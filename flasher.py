@@ -8,12 +8,11 @@ parser.add_argument("file", help="firmware file")
 parser.add_argument("--port", "-p", help="serial port", default="COM3")
 parser.add_argument("--baud", "-b", help="baud rate", default=115200, type=int)
 parser.add_argument("--start", "-s", help="start page", default=1, type=int)
-parser.add_argument("--crypt", "-c", help="crypt", action="store_true")
-parser.add_argument("--modbus", "-m", help="modbus", action="store_true")
-parser.add_argument("--mAdr", "-ma", help="MB address", default=32, type=int)
-parser.add_argument("--mBaud", "-mb", help="MB baud rate", default=9600, type=int)
-parser.add_argument("--mReg", "-mr", help="MB register", default=65535, type=int)
-parser.add_argument("--mVal", "-mv", help="MB value", default=0xDEAD, type=int)
+parser.add_argument("--modbus", "-m", help="ModBus", action="store_true")
+parser.add_argument("--mAdr", "-ma", help="ModBus address", default=32, type=int)
+parser.add_argument("--mBaud", "-mb", help="ModBus baud rate", default=9600, type=int)
+parser.add_argument("--mReg", "-mr", help="ModBus register", default=65535, type=int)
+parser.add_argument("--mVal", "-mv", help="ModBus value", default=0xDEAD, type=int)
 args = parser.parse_args()
 
 MAX_RETRIES = 10
@@ -60,10 +59,7 @@ def send_firmware(file, ser):
             for i, page in enumerate(reversed(data_list)):
                 print(f"Writing page {i + 1}/{len(data_list)}")
                 ser.write(b"\xde\xad\xbe\xef")
-                if args.crypt:
-                    np = len(data_list) - i - 1 + 0x80 + args.start
-                else:
-                    np = len(data_list) - i - 1 + args.start
+                np = len(data_list) - i - 1 + args.start
                 ser.write(bytes([np]))
                 ser.write(crc211(page).to_bytes(1, "little"))
                 ser.write(page)
